@@ -1,0 +1,7 @@
+torch>=1.6
+numpy
+matplotlib
+jupyter
+notebook
+mlagents
+unityagents
