@@ -1,4 +1,3 @@
-
 torch>=1.6
 numpy
 matplotlib
@@ -8,3 +7,10 @@ mlagents
 unityagents
 protobuf==3.20.3
 tqdm
+pytest
+seaborn
+pandas
+plotly
+tensorboard
+scipy
+scikit-learn
