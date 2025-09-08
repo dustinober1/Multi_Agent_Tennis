@@ -14,3 +14,17 @@ plotly
 tensorboard
 scipy
 scikit-learn
+
+# Documentation
+sphinx>=4.0.0
+sphinx-rtd-theme
+sphinx-autodoc-typehints
+myst-parser
+nbsphinx
+
+# Web Demo
+streamlit>=1.25.0
+streamlit-plotly-events
+streamlit-option-menu
+pillow
+opencv-python

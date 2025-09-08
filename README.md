@@ -37,6 +37,19 @@ jupyter notebook notebooks/Tennis.ipynb
 
 # Direct training
 python src/maddpg_agent.py
+
+# Launch interactive web demo
+./launch_demo.sh
+# OR: streamlit run src/web_demo.py
+```
+
+### 📚 Documentation
+```bash
+# Build comprehensive documentation
+./build_docs.sh
+
+# View documentation
+open docs/_build/html/index.html
 ```
 
 ## 🏗️ Project Architecture
@@ -102,7 +115,21 @@ Output: Q-value for state-action pair
 
 ## 🔧 Advanced Features
 
-### 1. Configuration Management
+### 1. **Interactive Web Demo** 🌐
+- **Real-time visualization** of agent gameplay
+- **Performance metrics** dashboard with live updates
+- **Hyperparameter exploration** with instant feedback
+- **Agent behavior analysis** and cooperation metrics
+- **Policy visualization** with interactive heatmaps
+
+### 2. **Professional Documentation** 📖
+- **Sphinx-generated** API documentation with auto-extraction
+- **Mathematical formulations** with MathJax rendering
+- **Code examples** and tutorials for easy onboarding
+- **Interactive notebooks** embedded in documentation
+- **Cross-referenced** modules and functions
+
+### 3. **Configuration Management**
 ```python
 from src.config import MADDPGConfig
 

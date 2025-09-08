@@ -12,17 +12,34 @@ import torch.optim as optim
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class Actor(nn.Module):
-    """Actor (Policy) Model."""
+    """Actor (Policy) Model for MADDPG agent.
+    
+    The Actor network learns a deterministic policy that maps states to actions.
+    It uses a deep neural network with batch normalization for stable training.
+    
+    Architecture:
+        - Input layer: state_size neurons
+        - Hidden layer 1: fc1_units neurons with BatchNorm and ReLU
+        - Hidden layer 2: fc2_units neurons with ReLU  
+        - Output layer: action_size neurons with Tanh activation
+        
+    The Tanh activation ensures actions are bounded in [-1, 1].
+    """
 
     def __init__(self, state_size, action_size, seed, fc1_units=256, fc2_units=128):
-        """Initialize parameters and build model.
-        Params
-        ======
-            state_size (int): Dimension of each state
-            action_size (int): Dimension of each action
-            seed (int): Random seed
-            fc1_units (int): Number of nodes in first hidden layer
-            fc2_units (int): Number of nodes in second hidden layer
+        """Initialize Actor network parameters and build model.
+        
+        Args:
+            state_size (int): Dimension of each state observation
+            action_size (int): Dimension of each action vector
+            seed (int): Random seed for reproducible weight initialization
+            fc1_units (int): Number of neurons in first hidden layer
+            fc2_units (int): Number of neurons in second hidden layer
+            
+        Note:
+            Uses Xavier uniform initialization for hidden layers and
+            small uniform initialization for output layer to ensure
+            stable learning at the beginning of training.
         """
         super(Actor, self).__init__()
         self.seed = torch.manual_seed(seed)
@@ -47,17 +64,36 @@ class Actor(nn.Module):
 
 
 class Critic(nn.Module):
-    """Critic (Value) Model."""
+    """Critic (Value) Model for MADDPG agent.
+    
+    The Critic network estimates the Q-value function Q(s,a) for state-action pairs.
+    In MADDPG, critics have access to the full global state and all agents' actions
+    during training, enabling centralized learning with decentralized execution.
+    
+    Architecture:
+        - Input: concatenated global state (all agents)
+        - Hidden layer 1: processes state information with BatchNorm and ReLU
+        - Hidden layer 2: processes state+action information with ReLU
+        - Output: single Q-value estimate
+        
+    The network uses batch normalization for stable training and proper
+    weight initialization for effective learning.
+    """
 
     def __init__(self, full_state_size, full_action_size, seed, fcs1_units=256, fc2_units=128):
-        """Initialize parameters and build model.
-        Params
-        ======
-            full_state_size (int): Dimension of full state (all agents)
-            full_action_size (int): Dimension of full action (all agents)
-            seed (int): Random seed
-            fcs1_units (int): Number of nodes in the first hidden layer
-            fc2_units (int): Number of nodes in the second hidden layer
+        """Initialize Critic network parameters and build model.
+        
+        Args:
+            full_state_size (int): Dimension of global state (all agents combined)
+            full_action_size (int): Dimension of global action (all agents combined)
+            seed (int): Random seed for reproducible weight initialization
+            fcs1_units (int): Number of neurons in first hidden layer
+            fc2_units (int): Number of neurons in second hidden layer
+            
+        Note:
+            The first layer processes only state information, while the second
+            layer processes the concatenation of first layer output and actions.
+            This architecture is typical for DDPG-style critics.
         """
         super(Critic, self).__init__()
         self.seed = torch.manual_seed(seed)
