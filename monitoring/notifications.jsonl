@@ -1,0 +1,1 @@
+{"rule_name": "High Inference Time", "metric": "inference_time", "value": 1.5, "threshold": 1.0, "severity": "medium", "description": "Model inference time is too high", "timestamp": "2025-09-09T19:30:04.981522", "model_name": "demo_tennis_model", "notification_sent": "2025-09-09T19:30:04.981887", "channels": ["console", "file"]}

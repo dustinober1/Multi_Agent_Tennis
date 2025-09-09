@@ -1,0 +1,309 @@
+name: MLOps Pipeline - MADDPG Tennis
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run weekly training on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+    inputs:
+      episodes:
+        description: 'Number of training episodes'
+        required: false
+        default: '500'
+      optimize:
+        description: 'Run hyperparameter optimization'
+        required: false
+        default: 'false'
+        type: boolean
+
+env:
+  PYTHON_VERSION: '3.8'
+  MLFLOW_TRACKING_URI: http://localhost:5000
+
+jobs:
+  # Data validation and preprocessing
+  validate-data:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Validate configuration
+      run: |
+        python -c "
+        from src.config import MADDPGConfig
+        config = MADDPGConfig()
+        print('✅ Configuration validated')
+        print(f'   Max episodes: {config.max_episodes}')
+        print(f'   Target score: {config.target_score}')
+        "
+    
+    - name: Run unit tests
+      run: |
+        python -m pytest tests/ -v
+    
+    - name: Code quality check
+      run: |
+        pip install flake8 black
+        flake8 src/ --max-line-length=100 --ignore=E203,W503
+        black --check src/
+
+  # Training job
+  train-model:
+    runs-on: ubuntu-latest
+    needs: validate-data
+    if: github.event_name != 'pull_request'
+    
+    strategy:
+      matrix:
+        experiment: [baseline, optimized]
+        
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Setup MLflow tracking
+      run: |
+        mkdir -p mlflow_data artifacts
+        mlflow server \
+          --backend-store-uri sqlite:///mlflow_data/mlflow.db \
+          --default-artifact-root ./artifacts \
+          --host 0.0.0.0 \
+          --port 5000 &
+        
+        # Wait for MLflow to start
+        sleep 10
+    
+    - name: Run training - Baseline
+      if: matrix.experiment == 'baseline'
+      run: |
+        python src/mlops_training.py \
+          --experiment-name "ci_baseline_$(date +%Y%m%d_%H%M%S)" \
+          --episodes ${{ github.event.inputs.episodes || '200' }} \
+          --platforms mlflow \
+          --evaluate
+    
+    - name: Run training - Optimized
+      if: matrix.experiment == 'optimized' && github.event.inputs.optimize == 'true'
+      run: |
+        python src/mlops_training.py \
+          --experiment-name "ci_optimized_$(date +%Y%m%d_%H%M%S)" \
+          --episodes ${{ github.event.inputs.episodes || '200' }} \
+          --platforms mlflow \
+          --optimize \
+          --optimize-trials 10 \
+          --evaluate
+    
+    - name: Upload model artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: trained-models-${{ matrix.experiment }}
+        path: |
+          models/
+          artifacts/
+          experiments/
+    
+    - name: Generate training report
+      run: |
+        python -c "
+        import mlflow
+        import json
+        from datetime import datetime
+        
+        # Generate summary report
+        report = {
+            'timestamp': datetime.now().isoformat(),
+            'experiment_type': '${{ matrix.experiment }}',
+            'episodes': '${{ github.event.inputs.episodes || '200' }}',
+            'commit_sha': '${{ github.sha }}',
+            'branch': '${{ github.ref_name }}'
+        }
+        
+        with open('training_report_${{ matrix.experiment }}.json', 'w') as f:
+            json.dump(report, f, indent=2)
+        
+        print('✅ Training report generated')
+        "
+    
+    - name: Upload training report
+      uses: actions/upload-artifact@v3
+      with:
+        name: training-report-${{ matrix.experiment }}
+        path: training_report_${{ matrix.experiment }}.json
+
+  # Model evaluation and testing
+  evaluate-model:
+    runs-on: ubuntu-latest
+    needs: train-model
+    if: github.event_name != 'pull_request'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Download model artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: trained-models-baseline
+        path: ./baseline_models/
+    
+    - name: Run model evaluation
+      run: |
+        python -c "
+        import os
+        import torch
+        import numpy as np
+        from src.config import MADDPGConfig
+        from src.mlops_training import MLOpsTrainer
+        
+        # Mock evaluation since we don't have real environment in CI
+        config = MADDPGConfig()
+        
+        # Create trainer
+        trainer = MLOpsTrainer(
+            config=config,
+            experiment_name='ci_evaluation',
+            tracking_platforms=[]  # No tracking in CI evaluation
+        )
+        
+        # Run evaluation
+        eval_results = trainer.evaluate(episodes=10)
+        
+        print('📊 Evaluation Results:')
+        for key, value in eval_results.items():
+            print(f'   {key}: {value:.4f}')
+        
+        # Check if model meets minimum requirements
+        min_score = 0.1  # Minimum acceptable score
+        if eval_results['eval_mean_score'] >= min_score:
+            print('✅ Model evaluation passed')
+            exit(0)
+        else:
+            print('❌ Model evaluation failed')
+            exit(1)
+        "
+
+  # Deployment preparation
+  prepare-deployment:
+    runs-on: ubuntu-latest
+    needs: [train-model, evaluate-model]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+    
+    - name: Prepare deployment package
+      run: |
+        mkdir -p deployment_package
+        
+        # Copy best models
+        find . -name "*.pth" -type f -exec cp {} deployment_package/ \;
+        
+        # Copy source code
+        cp -r src/ deployment_package/
+        cp requirements.txt deployment_package/
+        
+        # Create deployment manifest
+        cat > deployment_package/manifest.json << 'DEPLOY_EOF'
+        {
+          "model_name": "maddpg_tennis",
+          "version": "1.0.0",
+          "build_timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'",
+          "commit_sha": "'${{ github.sha }}'",
+          "branch": "'${{ github.ref_name }}'",
+          "framework": "pytorch",
+          "python_version": "'${{ env.PYTHON_VERSION }}'"
+        }
+        DEPLOY_EOF
+    
+    - name: Upload deployment package
+      uses: actions/upload-artifact@v3
+      with:
+        name: deployment-package
+        path: deployment_package/
+    
+    - name: Create release (if tagged)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: MADDPG Tennis Model ${{ github.ref }}
+        body: |
+          Automated release of MADDPG Tennis model
+          
+          🚀 **Training Results:**
+          - Episodes: ${{ github.event.inputs.episodes || '200' }}
+          - Commit: ${{ github.sha }}
+          - Branch: ${{ github.ref_name }}
+          
+          📦 **Artifacts:**
+          - Trained models
+          - Deployment package
+          - Training reports
+        draft: false
+        prerelease: false
+
+  # Notification and reporting
+  notify-completion:
+    runs-on: ubuntu-latest
+    needs: [validate-data, train-model, evaluate-model, prepare-deployment]
+    if: always()
+    
+    steps:
+    - name: Generate pipeline summary
+      run: |
+        echo "🎯 MLOps Pipeline Summary"
+        echo "========================"
+        echo "Branch: ${{ github.ref_name }}"
+        echo "Commit: ${{ github.sha }}"
+        echo "Trigger: ${{ github.event_name }}"
+        echo ""
+        echo "Job Results:"
+        echo "- Data Validation: ${{ needs.validate-data.result }}"
+        echo "- Model Training: ${{ needs.train-model.result }}"
+        echo "- Model Evaluation: ${{ needs.evaluate-model.result }}"
+        echo "- Deployment Prep: ${{ needs.prepare-deployment.result }}"
+        echo ""
+        
+        if [[ "${{ needs.train-model.result }}" == "success" && "${{ needs.evaluate-model.result }}" == "success" ]]; then
+          echo "✅ Pipeline completed successfully!"
+        else
+          echo "❌ Pipeline failed. Check job logs for details."
+        fi
+

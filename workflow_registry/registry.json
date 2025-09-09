@@ -1,0 +1,31 @@
+{
+  "workflow_actor": {
+    "v1.0.0": {
+      "version": "v1.0.0",
+      "model_path": "workflow_registry/models/workflow_actor/v1.0.0/model.pth",
+      "metadata_path": "workflow_registry/metadata/workflow_actor_v1.0.0.json",
+      "checksum": "2fbca2130d42ba2754377694b0b16933",
+      "created_at": "2025-09-09T19:30:07.373998",
+      "is_active": false,
+      "is_production": false
+    },
+    "v1.1.0": {
+      "version": "v1.1.0",
+      "model_path": "workflow_registry/models/workflow_actor/v1.1.0/model.pth",
+      "metadata_path": "workflow_registry/metadata/workflow_actor_v1.1.0.json",
+      "checksum": "a40436f9eb8aa0ac8ed5f3639714fdb1",
+      "created_at": "2025-09-09T19:30:07.404593",
+      "is_active": false,
+      "is_production": false
+    },
+    "v1.2.0": {
+      "version": "v1.2.0",
+      "model_path": "workflow_registry/models/workflow_actor/v1.2.0/model.pth",
+      "metadata_path": "workflow_registry/metadata/workflow_actor_v1.2.0.json",
+      "checksum": "43c3317c671a635f0ce1746553afe737",
+      "created_at": "2025-09-09T19:30:07.436441",
+      "is_active": false,
+      "is_production": true
+    }
+  }
+}

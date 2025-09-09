@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # MLflow Tracking Server
+  mlflow:
+    image: python:3.8-slim
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mlflow_data:/mlflow
+      - ./artifacts:/artifacts
+    command: >
+      sh -c "
+        pip install mlflow &&
+        mlflow server 
+          --backend-store-uri sqlite:///mlflow/mlflow.db
+          --default-artifact-root /artifacts
+          --host 0.0.0.0
+          --port 5000
+      "
+    environment:
+      - MLFLOW_TRACKING_URI=http://localhost:5000
+
+  # Jupyter Notebook for Analysis
+  jupyter:
+    image: jupyter/tensorflow-notebook:latest
+    ports:
+      - "8888:8888"
+    volumes:
+      - ../:/home/jovyan/work
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+
+  # Optuna Dashboard
+  optuna:
+    image: python:3.8-slim
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./optuna_data:/optuna
+    command: >
+      sh -c "
+        pip install optuna optuna-dashboard &&
+        optuna-dashboard sqlite:///optuna/optuna.db --host 0.0.0.0 --port 8080
+      "
+
+  # Redis for distributed hyperparameter optimization
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis_data:/data
+
+  # PostgreSQL for production MLflow backend
+  postgres:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=mlflow
+      - POSTGRES_USER=mlflow
+      - POSTGRES_PASSWORD=mlflow123
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+

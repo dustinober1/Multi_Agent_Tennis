@@ -1,0 +1,37 @@
+{
+  "model_id": "tennis_actor:v2.0.0",
+  "name": "tennis_actor",
+  "version": "v2.0.0",
+  "created_at": "2025-09-09T19:29:56.205263",
+  "author": "mlops_demo",
+  "description": "Demo model v2.0.0",
+  "tags": [
+    "demo",
+    "tennis",
+    "actor"
+  ],
+  "framework": "pytorch",
+  "algorithm": "maddpg",
+  "hyperparameters": {
+    "learning_rate": 0.002,
+    "batch_size": 128
+  },
+  "metrics": {
+    "reward": 0.9
+  },
+  "artifacts": {},
+  "dependencies": {
+    "torch": "2.8.0",
+    "numpy": "2.1.3",
+    "mlflow": "not_installed",
+    "wandb": "not_installed",
+    "optuna": "not_installed"
+  },
+  "model_size_mb": 0.0008859634399414062,
+  "training_duration": null,
+  "dataset_info": null,
+  "experiment_id": null,
+  "parent_models": null,
+  "deployment_status": "production",
+  "performance_benchmark": null
+}

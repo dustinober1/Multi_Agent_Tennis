@@ -1,0 +1,122 @@
+[
+  {
+    "timestamp": "2025-09-09T19:29:57.244524",
+    "model_version": "v2.0.0",
+    "inference_time": 0.04655001722900324,
+    "prediction_score": 0.7165742400720181,
+    "input_size": 33,
+    "memory_usage": 21.5,
+    "cpu_usage": 7.8,
+    "gpu_usage": null,
+    "error_count": 0,
+    "success_count": 1
+  },
+  {
+    "timestamp": "2025-09-09T19:29:58.350030",
+    "model_version": "v2.0.0",
+    "inference_time": 0.07517302256869215,
+    "prediction_score": 0.4027994937795979,
+    "input_size": 33,
+    "memory_usage": 21.5,
+    "cpu_usage": 8.2,
+    "gpu_usage": null,
+    "error_count": 0,
+    "success_count": 1
+  },
+  {
+    "timestamp": "2025-09-09T19:29:59.452588",
+    "model_version": "v2.0.0",
+    "inference_time": 0.04348227765960515,
+    "prediction_score": 0.4354807982470816,
+    "input_size": 33,
+    "memory_usage": 21.5,
+    "cpu_usage": 4.9,
+    "gpu_usage": null,
+    "error_count": 0,
+    "success_count": 1
+  },
+  {
+    "timestamp": "2025-09-09T19:30:00.558069",
+    "model_version": "v2.0.0",
+    "inference_time": 0.04192762186238261,
+    "prediction_score": 0.8236004926789666,
+    "input_size": 33,
+    "memory_usage": 21.5,
+    "cpu_usage": 4.9,
+    "gpu_usage": null,
+    "error_count": 0,
+    "success_count": 1
+  },
+  {
+    "timestamp": "2025-09-09T19:30:01.664125",
+    "model_version": "v2.0.0",
+    "inference_time": 0.01144338675164641,
+    "prediction_score": 0.5232412617285906,
+    "input_size": 33,
+    "memory_usage": 21.0,
+    "cpu_usage": 5.7,
+    "gpu_usage": null,
+    "error_count": 0,
+    "success_count": 1
+  },
+  {
+    "timestamp": "2025-09-09T19:30:02.771085",
+    "model_version": "v2.0.0",
+    "inference_time": 0.012588061463293334,
+    "prediction_score": 0.4828588037164774,
+    "input_size": 33,
+    "memory_usage": 21.0,
+    "cpu_usage": 6.5,
+    "gpu_usage": null,
+    "error_count": 0,
+    "success_count": 1
+  },
+  {
+    "timestamp": "2025-09-09T19:30:03.876585",
+    "model_version": "v2.0.0",
+    "inference_time": 0.012291447363485457,
+    "prediction_score": 0.32409092874346007,
+    "input_size": 33,
+    "memory_usage": 21.0,
+    "cpu_usage": 14.5,
+    "gpu_usage": null,
+    "error_count": 0,
+    "success_count": 1
+  },
+  {
+    "timestamp": "2025-09-09T19:30:04.981507",
+    "model_version": "v2.0.0",
+    "inference_time": 1.5,
+    "prediction_score": 0.6972596319283824,
+    "input_size": 33,
+    "memory_usage": 20.9,
+    "cpu_usage": 5.9,
+    "gpu_usage": null,
+    "error_count": 0,
+    "success_count": 1
+  },
+  {
+    "timestamp": "2025-09-09T19:30:06.086218",
+    "model_version": "v2.0.0",
+    "inference_time": 0.05483161015446188,
+    "prediction_score": 0.47237950123568256,
+    "input_size": 33,
+    "memory_usage": 20.9,
+    "cpu_usage": 6.8,
+    "gpu_usage": null,
+    "error_count": 0,
+    "success_count": 1
+  },
+  {
+    "timestamp": "2025-09-09T19:30:07.190473",
+    "model_version": "v2.0.0",
+    "inference_time": 0.07562911626148804,
+    "prediction_score": 0.6881124953225252,
+    "input_size": 33,
+    "memory_usage": 20.9,
+    "cpu_usage": 7.2,
+    "gpu_usage": null,
+    "error_count": 0,
+    "success_count": 1
+  }
+]
